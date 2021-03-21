@@ -31,8 +31,8 @@ EventLoop::EventLoop()
       callingPendingFunctors_(false),
       threadId_(CurrentThread::tid()),
       poller_(Poller::newDefaultPoller(this)),
-      weakupFd_(creatEventfd()),
-      wakeupChannel_(new Channel(this, weakupFd_))
+      wakeupFd_(creatEventfd()),
+      wakeupChannel_(new Channel(this, wakeupFd_))
 {
     LOG_DEBUG("EventLoop created %p in thread %d\n", this, threadId_);
     if (t_loopInThisThread)
@@ -54,7 +54,7 @@ EventLoop::~EventLoop()
 {
     wakeupChannel_->disableAll();
     wakeupChannel_->remove();
-    ::close(weakupFd_);
+    ::close(wakeupFd_);
     t_loopInThisThread = nullptr;
 }
 
@@ -78,7 +78,7 @@ void EventLoop::loop()
         //执行当前EventLoop事件循环需要处理的回调操作
         doPendingFunctors();
     }
-    LOG_INFO("EventLoop %P stop looping \n", this);
+    LOG_INFO("EventLoop %p stop looping. \n", this);
     looping_ = false;
 }
 
@@ -131,10 +131,10 @@ void EventLoop::queueInLoop(Functor cb)
 void EventLoop::handleRead()
 {
     uint64_t one = 1;
-    ssize_t n = read(weakupFd_, &one, sizeof one);
+    ssize_t n = read(wakeupFd_, &one, sizeof one);
     if (n != sizeof one)
     {
-        LOG_ERROR("EventLoop::handleRead() reads %d bytes instead of 8", n);
+        LOG_ERROR("EventLoop::handleRead() reads %lu bytes instead of 8", n);
     }
 }
 
@@ -142,7 +142,7 @@ void EventLoop::handleRead()
 void EventLoop::wakeup()
 {
     uint64_t one = 1;
-    ssize_t n = write(weakupFd_, &one, sizeof one);
+    ssize_t n = write(wakeupFd_, &one, sizeof one);
     if (n != sizeof one)
     {
         LOG_ERROR("EventLoop::wakeup() writes %lu bytes instead of 8 \n", n);

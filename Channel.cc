@@ -21,7 +21,7 @@ Channel::~Channel()
 {
 }
 
-//channel的tie方法什么时候调用过
+//channel的tie方法什么时候调用过? 一个TcpConnection新连接创建的时候 TcpConnection=》channel
 void Channel::tie(const std::shared_ptr<void> &obj)
 {
     tie_ = obj;
@@ -71,7 +71,7 @@ void Channel::handleEventWithGuard(Timestamp receiveTime)
             closeCallback_();
         }
     }
-    if (revents_ * EPOLLERR)
+    if (revents_ & EPOLLERR)
     {
         if (errorCallback_)
         {

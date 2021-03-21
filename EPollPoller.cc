@@ -70,7 +70,7 @@ Timestamp EPollPoller::poll(int timeoutMS, ChannelList *activeChannels)
 void EPollPoller::updateChannel(Channel *channel)
 {
     const int index = channel->index();
-    LOG_INFO("func:%s => fd= %d events=%d\n", __FUNCTION__, channel->fd(), channel->events(), index);
+    LOG_INFO("func=%s => fd=%d events=%d index=%d \n", __FUNCTION__, channel->fd(), channel->events(), index);
 
     if (index == kNew || index == kDeleted)
     {
@@ -104,7 +104,7 @@ void EPollPoller::removeChannel(Channel *channel)
     int fd = channel->fd();
     channels_.erase(fd);
 
-    LOG_INFO("func:%s => fd= %d\n", __FUNCTION__, fd);
+    LOG_INFO("func=%s => fd=%d\n", __FUNCTION__, fd);
 
     int index = channel->index();
     if (index == kAdded)
